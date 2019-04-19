@@ -4,7 +4,8 @@
 		 <ni-button size="small">small</ni-button>
 		 <ni-button size="normal">normal</ni-button>
 		 <ni-button size="large">large</ni-button>
-		 <ni-input type="text" ></ni-input>
+		 <ni-input type="text" size="small"  ></ni-input>
+		 <ni-input type="text" size="normal"  ></ni-input>
   </div>
 </template>
 
