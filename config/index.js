@@ -11,24 +11,32 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-		'/api':{
-			target:'http://api.douban.com/v2/movie/top250?start=25&count=25',
-			changeOrigin: true, 
-			 pathRewrite: {  
-				'^/api': '/'  
-			}  
-		}
-	},
+      '/mock': {
+        target: 'http://localhost:3000/mock',
+        changeOrigin: true,
+      },
+      '/upload': {
+        target: 'http://localhost:3000/',
+        changeOrigin: true,
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
     port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
-    autoOpenBrowser: true,
+    autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
     poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
 
-    
+    // Use Eslint Loader?
+    // If true, your code will be linted during bundling and
+    // linting errors and warnings will be shown in the console.
+    useEslint: true,
+    // If true, eslint errors and warnings will also be shown in the error overlay
+    // in the browser.
+    showEslintErrorsInOverlay: false,
+
     /**
      * Source Maps
      */
@@ -57,7 +65,7 @@ module.exports = {
      * Source Maps
      */
 
-    productionSourceMap: true,
+    productionSourceMap: false,
     // https://webpack.js.org/configuration/devtool/#production
     devtool: '#source-map',
 

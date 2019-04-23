@@ -10,8 +10,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const os = require('os')
+function resolve (dir) {
+  return path.join(__dirname, '..', dir)
+}
 
-const env = require('../config/prod.env')
+const env = process.env.NODE_ENV === 'testing'
+  ? require('../config/test.env')
+  : require('../config/prod.env')
 
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -20,6 +26,14 @@ const webpackConfig = merge(baseWebpackConfig, {
       extract: true,
       usePostCSS: true
     })
+  },
+  resolve: {
+    extensions: ['.js', '.vue', '.json'],
+    alias: {
+      'vue$': 'vue/dist/vue.min.js',
+      '@': resolve('src'),
+      't-component': resolve('packages/index.js')
+    }
   },
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
@@ -46,7 +60,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       filename: utils.assetsPath('css/[name].[contenthash].css'),
       // Setting the following option to `false` will not extract CSS from codesplit chunks.
       // Their CSS will instead be inserted dynamically with style-loader when the codesplit chunk has been loaded by webpack.
-      // It's currently set to `true` because we are seeing that sourcemaps are included in the codesplit bundle as well when it's `false`, 
+      // It's currently set to `true` because we are seeing that sourcemaps are included in the codesplit bundle as well when it's `false`,
       // increasing file size: https://github.com/vuejs-templates/webpack/issues/1110
       allChunks: true,
     }),
@@ -54,14 +68,16 @@ const webpackConfig = merge(baseWebpackConfig, {
     // duplicated CSS from different components can be deduped.
     new OptimizeCSSPlugin({
       cssProcessorOptions: config.build.productionSourceMap
-        ? { safe: true, map: { inline: false } }
-        : { safe: true }
+        ? { safe: true, map: { inline: false } ,discardComments: {removeAll: true }}
+        : { safe: true ,discardComments: {removeAll: true }}
     }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
-      filename: config.build.index,
+      filename: process.env.NODE_ENV === 'testing'
+        ? 'index.html'
+        : config.build.index,
       template: 'index.html',
       inject: true,
       minify: {
@@ -95,7 +111,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // extract webpack runtime and module manifest to its own file in order to
     // prevent vendor hash from being updated whenever app bundle is updated
     new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest',
+      name: ['manifest','vendor'].reverse(),
       minChunks: Infinity
     }),
     // This instance extracts shared chunks from code splitted chunks and bundles them
@@ -105,7 +121,10 @@ const webpackConfig = merge(baseWebpackConfig, {
       name: 'app',
       async: 'vendor-async',
       children: true,
-      minChunks: 3
+      minChunks: (module, count) => {
+        // 被 2 个及以上 chunk 使用的共用模块提取出来
+        return count >= 2
+      }
     }),
 
     // copy custom static assets
